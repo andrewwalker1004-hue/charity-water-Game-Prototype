@@ -1,6 +1,6 @@
 /* =========================================================
    FLOW — charity: water inspired puzzle game
-   script.js — game data, state, logic, and rendering
+   script.js — game data, state, logic, and rendering (Final polish pass)
    ========================================================= */
 
 (function () {
@@ -13,24 +13,11 @@
   const STORAGE_KEY = "flowGameSave_v1";
 
   const TOWNS = [
-    {
-      id: 1,
-      name: "The Beginning",
-      impactText: "You helped bring water to approximately 120 households in this simulated community.",
-    },
-    {
-      id: 2,
-      name: "Growing Community",
-      impactText: "You helped bring water to approximately 180 households in this simulated community.",
-    },
-    {
-      id: 3,
-      name: "The Water Challenge",
-      impactText: "You helped bring water to approximately 150 households in this simulated community, even under difficult supply shortages.",
-    },
+    { id: 1, name: "The Beginning", impactText: "You helped bring water to approximately 120 households in this simulated community." },
+    { id: 2, name: "Growing Community", impactText: "You helped bring water to approximately 180 households in this simulated community." },
+    { id: 3, name: "The Water Challenge", impactText: "You helped bring water to approximately 150 households in this simulated community, even under difficult supply shortages." },
   ];
 
-  // Zone template: icon + display name are shared; demand/critical vary per puzzle.
   const ZONE_META = {
     hospital: { name: "Hospital", icon: "🏥" },
     homes: { name: "Homes", icon: "🏠" },
@@ -38,7 +25,6 @@
     factory: { name: "Factory", icon: "🏭" },
   };
 
-  // Rotating educational facts shown after each puzzle.
   const EDU_FACTS = [
     "771 million people worldwide lack access to basic clean drinking water close to home.",
     "Every $1 invested in clean water can yield up to $4 in economic returns through better health and productivity.",
@@ -56,7 +42,6 @@
     return EDU_FACTS[i % EDU_FACTS.length];
   }
 
-  // Build a puzzle object. zones: {key: {demand, critical}}
   function makePuzzle(id, town, number, startingSupply, leakage, zoneDemands, factIndex) {
     const zones = Object.keys(zoneDemands).map((key) => ({
       key,
@@ -66,11 +51,7 @@
       critical: !!zoneDemands[key].critical,
     }));
     return {
-      id,
-      town,
-      number,
-      startingSupply,
-      leakage,
+      id, town, number, startingSupply, leakage,
       usableSupply: startingSupply - leakage,
       zones,
       fact: fact(factIndex),
@@ -78,78 +59,67 @@
   }
 
   const PUZZLES = [
-    // ---------------- TOWN 1: The Beginning ----------------
-    makePuzzle("t1p1", 1, 1, 1200, 0, {
-      hospital: { demand: 500 }, homes: { demand: 300 }, school: { demand: 250 }, factory: { demand: 150 },
-    }, 0),
-    makePuzzle("t1p2", 1, 2, 1300, 0, {
-      hospital: { demand: 450 }, homes: { demand: 350 }, school: { demand: 300 }, factory: { demand: 200 },
-    }, 1),
-    makePuzzle("t1p3", 1, 3, 1400, 0, {
-      hospital: { demand: 400 }, homes: { demand: 400 }, school: { demand: 350 }, factory: { demand: 250 },
-    }, 2),
-    makePuzzle("t1p4", 1, 4, 1550, 0, {
-      hospital: { demand: 500 }, homes: { demand: 400 }, school: { demand: 350 }, factory: { demand: 300 },
-    }, 3),
-    makePuzzle("t1p5", 1, 5, 1500, 0, {
-      hospital: { demand: 550 }, homes: { demand: 450 }, school: { demand: 400 }, factory: { demand: 350 },
-    }, 4),
+    makePuzzle("t1p1", 1, 1, 1200, 0, { hospital: { demand: 500 }, homes: { demand: 300 }, school: { demand: 250 }, factory: { demand: 150 } }, 0),
+    makePuzzle("t1p2", 1, 2, 1300, 0, { hospital: { demand: 450 }, homes: { demand: 350 }, school: { demand: 300 }, factory: { demand: 200 } }, 1),
+    makePuzzle("t1p3", 1, 3, 1400, 0, { hospital: { demand: 400 }, homes: { demand: 400 }, school: { demand: 350 }, factory: { demand: 250 } }, 2),
+    makePuzzle("t1p4", 1, 4, 1550, 0, { hospital: { demand: 500 }, homes: { demand: 400 }, school: { demand: 350 }, factory: { demand: 300 } }, 3),
+    makePuzzle("t1p5", 1, 5, 1500, 0, { hospital: { demand: 550 }, homes: { demand: 450 }, school: { demand: 400 }, factory: { demand: 350 } }, 4),
 
-    // ---------------- TOWN 2: Growing Community ----------------
-    makePuzzle("t2p1", 2, 1, 1850, 0, {
-      hospital: { demand: 600 }, homes: { demand: 500 }, school: { demand: 400 }, factory: { demand: 350 },
-    }, 5),
-    makePuzzle("t2p2", 2, 2, 1700, 150, {
-      hospital: { demand: 600 }, homes: { demand: 450 }, school: { demand: 350 }, factory: { demand: 300 },
-    }, 6),
-    makePuzzle("t2p3", 2, 3, 1600, 0, {
-      hospital: { demand: 650 }, homes: { demand: 500 }, school: { demand: 400 }, factory: { demand: 350 },
-    }, 7),
-    makePuzzle("t2p4", 2, 4, 2000, 200, {
-      hospital: { demand: 700 }, homes: { demand: 550 }, school: { demand: 450 }, factory: { demand: 400 },
-    }, 8),
-    makePuzzle("t2p5", 2, 5, 2200, 300, {
-      hospital: { demand: 750 }, homes: { demand: 600 }, school: { demand: 500 }, factory: { demand: 450 },
-    }, 9),
+    makePuzzle("t2p1", 2, 1, 1850, 0, { hospital: { demand: 600 }, homes: { demand: 500 }, school: { demand: 400 }, factory: { demand: 350 } }, 5),
+    makePuzzle("t2p2", 2, 2, 1700, 150, { hospital: { demand: 600 }, homes: { demand: 450 }, school: { demand: 350 }, factory: { demand: 300 } }, 6),
+    makePuzzle("t2p3", 2, 3, 1600, 0, { hospital: { demand: 650 }, homes: { demand: 500 }, school: { demand: 400 }, factory: { demand: 350 } }, 7),
+    makePuzzle("t2p4", 2, 4, 2000, 200, { hospital: { demand: 700 }, homes: { demand: 550 }, school: { demand: 450 }, factory: { demand: 400 } }, 8),
+    makePuzzle("t2p5", 2, 5, 2200, 300, { hospital: { demand: 750 }, homes: { demand: 600 }, school: { demand: 500 }, factory: { demand: 450 } }, 9),
 
-    // ---------------- TOWN 3: The Water Challenge ----------------
-    makePuzzle("t3p1", 3, 1, 2100, 0, {
-      hospital: { demand: 700, critical: true }, homes: { demand: 550 }, school: { demand: 450 }, factory: { demand: 400 },
-    }, 0),
-    makePuzzle("t3p2", 3, 2, 1900, 0, {
-      hospital: { demand: 750, critical: true }, homes: { demand: 600 }, school: { demand: 500 }, factory: { demand: 450 },
-    }, 1),
-    makePuzzle("t3p3", 3, 3, 1700, 0, {
-      hospital: { demand: 800, critical: true }, homes: { demand: 650 }, school: { demand: 550 }, factory: { demand: 500 },
-    }, 2),
-    makePuzzle("t3p4", 3, 4, 2200, 250, {
-      hospital: { demand: 850, critical: true }, homes: { demand: 700 }, school: { demand: 600 }, factory: { demand: 550 },
-    }, 3),
-    makePuzzle("t3p5", 3, 5, 2500, 400, {
-      hospital: { demand: 950, critical: true }, homes: { demand: 800 }, school: { demand: 650 }, factory: { demand: 600 },
-    }, 4),
+    makePuzzle("t3p1", 3, 1, 2100, 0, { hospital: { demand: 700, critical: true }, homes: { demand: 550 }, school: { demand: 450 }, factory: { demand: 400 } }, 0),
+    makePuzzle("t3p2", 3, 2, 1900, 0, { hospital: { demand: 750, critical: true }, homes: { demand: 600 }, school: { demand: 500 }, factory: { demand: 450 } }, 1),
+    makePuzzle("t3p3", 3, 3, 1700, 0, { hospital: { demand: 800, critical: true }, homes: { demand: 650 }, school: { demand: 550 }, factory: { demand: 500 } }, 2),
+    makePuzzle("t3p4", 3, 4, 2200, 250, { hospital: { demand: 850, critical: true }, homes: { demand: 700 }, school: { demand: 600 }, factory: { demand: 550 } }, 3),
+    makePuzzle("t3p5", 3, 5, 2500, 400, { hospital: { demand: 950, critical: true }, homes: { demand: 800 }, school: { demand: 650 }, factory: { demand: 600 } }, 4),
   ];
 
   const PUZZLES_PER_TOWN = 5;
 
-  function getPuzzleIndex(id) {
-    return PUZZLES.findIndex((p) => p.id === id);
-  }
-  function getPuzzleById(id) {
-    return PUZZLES.find((p) => p.id === id);
-  }
-  function getTownPuzzles(townId) {
-    return PUZZLES.filter((p) => p.town === townId);
-  }
-  function getTownMeta(townId) {
-    return TOWNS.find((t) => t.id === townId);
-  }
+  function getPuzzleIndex(id) { return PUZZLES.findIndex((p) => p.id === id); }
+  function getPuzzleById(id) { return PUZZLES.find((p) => p.id === id); }
+  function getTownPuzzles(townId) { return PUZZLES.filter((p) => p.town === townId); }
+  function getTownMeta(townId) { return TOWNS.find((t) => t.id === townId); }
 
   const ACHIEVEMENT_DEFS = [
     { id: "first_drop", icon: "💧", name: "First Drop", desc: "Complete your first puzzle." },
     { id: "perfect_flow", icon: "🌟", name: "Perfect Flow", desc: "Reach 100% efficiency on a puzzle." },
     { id: "water_hero", icon: "🏆", name: "Water Hero", desc: "Complete an entire town." },
     { id: "resource_master", icon: "🧩", name: "Resource Master", desc: "Clear a water-shortage puzzle." },
+  ];
+
+  // ---- Difficulty modes ----
+  const DIFFICULTIES = {
+    easy: {
+      id: "easy", name: "Easy", icon: "🌤️", supplyMultiplier: 1.2, waiveLeakage: true, timerSeconds: null,
+      desc: "More breathing room while you learn the ropes.",
+      rules: ["+20% usable water supply", "Pipe leakage is waived", "No countdown timer"],
+    },
+    normal: {
+      id: "normal", name: "Normal", icon: "⚖️", supplyMultiplier: 1.0, waiveLeakage: false, timerSeconds: null,
+      desc: "The standard Flow experience, exactly as designed.",
+      rules: ["Standard usable water supply", "Leakage applies as designed", "No countdown timer"],
+    },
+    hard: {
+      id: "hard", name: "Hard", icon: "🔥", supplyMultiplier: 0.9, waiveLeakage: false, timerSeconds: 90, warningSeconds: 20,
+      desc: "Less water, real pressure, and a ticking clock.",
+      rules: ["-10% usable water supply (on top of leakage)", "Full leakage applies", "90-second countdown — auto-submits at 0"],
+    },
+  };
+  const DIFFICULTY_ORDER = ["easy", "normal", "hard"];
+
+  // ---- Milestone tracking (array + loop driven, not hardcoded per-milestone) ----
+  const MILESTONES = [
+    { xp: 50, id: "first_steps", name: "First Steps", icon: "🥇" },
+    { xp: 150, id: "water_helper", name: "Water Helper", icon: "🚰" },
+    { xp: 300, id: "community_builder", name: "Community Builder", icon: "🏘️" },
+    { xp: 500, id: "water_champion", name: "Water Champion", icon: "🏅" },
+    { xp: 750, id: "flow_master", name: "Flow Master", icon: "🌊" },
+    { xp: 1000, id: "clean_water_hero", name: "Clean Water Hero", icon: "👑" },
   ];
 
   /* =========================================================
@@ -162,13 +132,41 @@
       totalXP: 0,
       currentTown: 1,
       currentPuzzleId: "t1p1",
-      puzzleBestReward: {},      // { puzzleId: xpAlreadyAwarded }
-      puzzleBestEfficiency: {},  // { puzzleId: bestEfficiency }
-      puzzleCleared: {},         // { puzzleId: true } once efficiency >= 60
+      difficulty: "normal",
+      puzzleBestReward: {},      // { "puzzleId::difficulty": xpAlreadyAwarded }
+      puzzleBestEfficiency: {},  // { "puzzleId::difficulty": bestEfficiency }
+      puzzleCleared: {},         // { puzzleId: true } once cleared on ANY difficulty
       unlockedPuzzleIds: ["t1p1"],
       achievements: {},          // { achievementId: true }
+      milestonesUnlocked: {},    // { milestoneId: true }
       soundEnabled: true,
     };
+  }
+
+  // Legacy keys were bare puzzleId (pre-difficulty-system saves). Migrate them to "puzzleId::normal".
+  function migrateDifficultyKeys(merged) {
+    ["puzzleBestReward", "puzzleBestEfficiency"].forEach((field) => {
+      const migrated = {};
+      Object.keys(merged[field] || {}).forEach((key) => {
+        const newKey = key.indexOf("::") === -1 ? key + "::normal" : key;
+        const val = merged[field][key];
+        migrated[newKey] = Math.max(migrated[newKey] || 0, val);
+      });
+      merged[field] = migrated;
+    });
+  }
+
+  function rewardKey(puzzleId, difficulty) {
+    return puzzleId + "::" + (difficulty || state.difficulty);
+  }
+
+  function bestRewardAcrossDifficulties(puzzleId) {
+    let max = 0;
+    DIFFICULTY_ORDER.forEach((d) => {
+      const v = state.puzzleBestReward[rewardKey(puzzleId, d)] || 0;
+      if (v > max) max = v;
+    });
+    return max;
   }
 
   let state = loadState();
@@ -179,17 +177,19 @@
       if (!raw) return defaultState();
       const parsed = JSON.parse(raw);
       const base = defaultState();
-      // Shallow-merge with defaults to survive corrupted/partial saves gracefully.
       const merged = Object.assign({}, base, parsed);
-      merged.puzzleBestReward = Object.assign({}, base.puzzleBestReward, parsed.puzzleBestReward || {});
-      merged.puzzleBestEfficiency = Object.assign({}, base.puzzleBestEfficiency, parsed.puzzleBestEfficiency || {});
+      merged.puzzleBestReward = Object.assign({}, parsed.puzzleBestReward || {});
+      merged.puzzleBestEfficiency = Object.assign({}, parsed.puzzleBestEfficiency || {});
       merged.puzzleCleared = Object.assign({}, base.puzzleCleared, parsed.puzzleCleared || {});
       merged.achievements = Object.assign({}, base.achievements, parsed.achievements || {});
+      merged.milestonesUnlocked = Object.assign({}, base.milestonesUnlocked, parsed.milestonesUnlocked || {});
+      migrateDifficultyKeys(merged);
       if (!Array.isArray(merged.unlockedPuzzleIds) || merged.unlockedPuzzleIds.length === 0) {
         merged.unlockedPuzzleIds = ["t1p1"];
       }
       if (!getPuzzleById(merged.currentPuzzleId)) merged.currentPuzzleId = "t1p1";
       if (typeof merged.totalXP !== "number" || isNaN(merged.totalXP)) merged.totalXP = 0;
+      if (!DIFFICULTIES[merged.difficulty]) merged.difficulty = "normal";
       return merged;
     } catch (e) {
       console.warn("Flow: save data was corrupted, starting fresh.", e);
@@ -215,7 +215,6 @@
      3. GAME LOGIC (pure functions — no DOM)
      ========================================================= */
 
-  // efficiency = (fullySatisfiedZones / totalZones) * 100
   function calculateEfficiency(zones, allocations) {
     const total = zones.length;
     const satisfied = zones.filter((z) => (allocations[z.key] || 0) >= z.demand).length;
@@ -234,29 +233,58 @@
     return 20;
   }
 
-  // Best achievable efficiency given supply constraints (brute force over zone subsets — max 4 zones = 16 subsets).
+  // Best achievable efficiency given a supply constraint (brute force over zone subsets — max 4 zones = 16 subsets).
   function getBestAchievableEfficiency(zones, usableSupply) {
     const n = zones.length;
     let best = 0;
     for (let mask = 0; mask < (1 << n); mask++) {
-      let sum = 0;
-      let count = 0;
+      let sum = 0, count = 0;
       for (let i = 0; i < n; i++) {
-        if (mask & (1 << i)) {
-          sum += zones[i].demand;
-          count++;
-        }
+        if (mask & (1 << i)) { sum += zones[i].demand; count++; }
       }
-      if (sum <= usableSupply) {
-        best = Math.max(best, count);
-      }
+      if (sum <= usableSupply) best = Math.max(best, count);
     }
     return (best / n) * 100;
   }
 
-  function isShortagePuzzle(puzzle) {
+  // Difficulty-adjusted usable supply. Easy: +20%, leakage waived. Normal: unchanged. Hard: leakage applies, then -10%.
+  function getEffectiveSupplyInfo(puzzle, difficultyId) {
+    const diff = DIFFICULTIES[difficultyId] || DIFFICULTIES.normal;
+    const baseUsable = diff.waiveLeakage ? puzzle.startingSupply : puzzle.usableSupply;
+    const usableSupply = Math.max(0, Math.round((baseUsable * diff.supplyMultiplier) / 10) * 10);
+    return {
+      usableSupply,
+      leakageApplied: diff.waiveLeakage ? 0 : puzzle.leakage,
+      startingSupply: puzzle.startingSupply,
+    };
+  }
+
+  function currentUsableSupply(puzzle) {
+    return getEffectiveSupplyInfo(puzzle, state.difficulty).usableSupply;
+  }
+
+  function isShortagePuzzleForSupply(puzzle, usableSupply) {
     const totalDemand = puzzle.zones.reduce((s, z) => s + z.demand, 0);
-    return puzzle.usableSupply < totalDemand;
+    return usableSupply < totalDemand;
+  }
+
+  // The efficiency needed to "clear" (and unlock the next puzzle) this round. Never higher than what's
+  // mathematically achievable given the current difficulty's supply — so no difficulty can make a puzzle unclearable.
+  function getClearThreshold(puzzle, usableSupply) {
+    const best = getBestAchievableEfficiency(puzzle.zones, usableSupply);
+    return Math.min(60, best);
+  }
+
+  // Auto-detect every newly-crossed milestone between oldXP and newXP (array/loop driven, not hardcoded).
+  function checkMilestones(oldXP, newXP) {
+    const newlyCrossed = [];
+    MILESTONES.forEach((m) => {
+      if (newXP >= m.xp && !state.milestonesUnlocked[m.id]) {
+        state.milestonesUnlocked[m.id] = true;
+        newlyCrossed.push(m);
+      }
+    });
+    return newlyCrossed;
   }
 
   /* =========================================================
@@ -265,6 +293,10 @@
 
   let currentAllocations = {}; // { zoneKey: amount } for the puzzle in progress
   let lastSubmission = null;   // snapshot used by the results overlay
+  let pendingPuzzleId = null;  // puzzle waiting on a difficulty choice
+  let selectedDifficultyDraft = null; // difficulty chosen on the select screen, before confirm
+  let timerInterval = null;
+  let timerRemaining = 0;
 
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -301,7 +333,8 @@
 
   const Sound = {
     click: () => playTone(520, 0.08, "sine", 0.05),
-    allocate: () => playTone(700, 0.05, "sine", 0.03),
+    allocate: () => playTone(700, 0.05, "sine", 0.03),       // gentle drop
+    submit: () => playTone(600, 0.1, "sine", 0.05),           // soft confirmation
     success: () => {
       playTone(523, 0.14, "triangle", 0.07);
       setTimeout(() => playTone(659, 0.14, "triangle", 0.07), 120);
@@ -311,12 +344,15 @@
       playTone(440, 0.15, "triangle", 0.06);
       setTimeout(() => playTone(392, 0.2, "triangle", 0.06), 150);
     },
-    failure: () => {
-      playTone(220, 0.25, "sawtooth", 0.05);
-      setTimeout(() => playTone(180, 0.3, "sawtooth", 0.05), 150);
+    failure: () => {                                          // subtle fail
+      playTone(220, 0.22, "sawtooth", 0.045);
+      setTimeout(() => playTone(180, 0.26, "sawtooth", 0.045), 140);
     },
-    townComplete: () => {
+    townComplete: () => {                                     // special sound
       [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.22, "triangle", 0.08), i * 140));
+    },
+    milestone: () => {
+      [660, 880, 990].forEach((f, i) => setTimeout(() => playTone(f, 0.16, "sine", 0.07), i * 110));
     },
   };
 
@@ -330,22 +366,20 @@
   const screens = {
     home: $("#screen-home"),
     tutorial: $("#screen-tutorial"),
+    difficulty: $("#screen-difficulty"),
     puzzle: $("#screen-puzzle"),
     leaderboard: $("#screen-leaderboard"),
   };
 
   function showScreen(name) {
+    stopTimer();
     Object.values(screens).forEach((el) => el.classList.remove("active"));
     screens[name].classList.add("active");
     window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
   }
 
-  function openOverlay(id) {
-    $("#" + id).classList.remove("hidden");
-  }
-  function closeOverlay(id) {
-    $("#" + id).classList.add("hidden");
-  }
+  function openOverlay(id) { $("#" + id).classList.remove("hidden"); }
+  function closeOverlay(id) { $("#" + id).classList.add("hidden"); }
 
   /* =========================================================
      7. RENDER: HOME SCREEN
@@ -361,7 +395,93 @@
   }
 
   /* =========================================================
-     8. RENDER: PUZZLE SCREEN
+     8. DIFFICULTY SELECT SCREEN
+     ========================================================= */
+
+  function openDifficultyScreen(targetPuzzleId) {
+    pendingPuzzleId = targetPuzzleId;
+    selectedDifficultyDraft = state.difficulty;
+    renderDifficultyScreen();
+    showScreen("difficulty");
+  }
+
+  function renderDifficultyScreen() {
+    const grid = $("#difficulty-grid");
+    grid.innerHTML = "";
+    DIFFICULTY_ORDER.forEach((id) => {
+      const diff = DIFFICULTIES[id];
+      const card = document.createElement("div");
+      card.className = "difficulty-card" + (selectedDifficultyDraft === id ? " selected" : "");
+      card.dataset.difficulty = id;
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-pressed", String(selectedDifficultyDraft === id));
+      card.innerHTML = `
+        <span class="diff-icon">${diff.icon}</span>
+        <div class="diff-name">${diff.name}</div>
+        <div class="diff-desc">${diff.desc}</div>
+        <ul class="diff-rules">${diff.rules.map((r) => `<li>• ${r}</li>`).join("")}</ul>
+      `;
+      const select = () => {
+        selectedDifficultyDraft = id;
+        Sound.click();
+        renderDifficultyScreen();
+      };
+      card.addEventListener("click", select);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); }
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function confirmDifficultyAndEnter() {
+    state.difficulty = selectedDifficultyDraft || "normal";
+    saveProgress();
+    Sound.click();
+    const target = pendingPuzzleId || state.currentPuzzleId;
+    pendingPuzzleId = null;
+    loadPuzzle(target);
+  }
+
+  /* =========================================================
+     9. COUNTDOWN TIMER (Hard mode only)
+     ========================================================= */
+
+  function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function startTimerIfNeeded(puzzle) {
+    stopTimer();
+    const diff = DIFFICULTIES[state.difficulty];
+    const wrap = $("#puzzle-timer-wrap");
+    if (!diff.timerSeconds) {
+      wrap.classList.add("hidden");
+      wrap.classList.remove("timer-warning");
+      return;
+    }
+    wrap.classList.remove("hidden");
+    timerRemaining = diff.timerSeconds;
+    updateTimerDisplay(diff);
+    timerInterval = setInterval(() => {
+      timerRemaining -= 1;
+      updateTimerDisplay(diff);
+      if (timerRemaining <= 0) {
+        stopTimer();
+        submitDistribution(true);
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay(diff) {
+    const wrap = $("#puzzle-timer-wrap");
+    $("#puzzle-timer").textContent = `${Math.max(0, timerRemaining)}s`;
+    wrap.classList.toggle("timer-warning", timerRemaining <= (diff.warningSeconds || 20));
+  }
+
+  /* =========================================================
+     10. RENDER: PUZZLE SCREEN
      ========================================================= */
 
   function loadPuzzle(puzzleId) {
@@ -374,35 +494,48 @@
     saveProgress();
     renderPuzzle();
     showScreen("puzzle");
+    startTimerIfNeeded(puzzle);
   }
 
   function renderPuzzle() {
     const puzzle = getPuzzleById(state.currentPuzzleId);
     if (!puzzle) return;
 
+    const diff = DIFFICULTIES[state.difficulty];
+    const supplyInfo = getEffectiveSupplyInfo(puzzle, state.difficulty);
+    const usableSupply = supplyInfo.usableSupply;
+
     $("#puzzle-title").textContent = `Town ${puzzle.town} – Puzzle ${puzzle.number}`;
-    $("#puzzle-subtitle").textContent = getTownMeta(puzzle.town).name;
+    $("#puzzle-subtitle").textContent = `${getTownMeta(puzzle.town).name} • ${diff.icon} ${diff.name} Mode`;
     $("#puzzle-xp").textContent = state.totalXP;
+    $("#puzzle-difficulty-label").textContent = diff.name;
 
     const totalDemand = puzzle.zones.reduce((s, z) => s + z.demand, 0);
-    $("#supply-total").textContent = `${puzzle.usableSupply.toLocaleString()} L`;
+    $("#supply-total").textContent = `${usableSupply.toLocaleString()} L`;
     $("#supply-demand").textContent = `${totalDemand.toLocaleString()} L`;
 
-    // Leakage banner
-    if (puzzle.leakage > 0) {
-      $("#leakage-banner").classList.remove("hidden");
-      $("#leakage-text").textContent =
-        `Starting Supply: ${puzzle.startingSupply.toLocaleString()} L  —  Leakage: ${puzzle.leakage.toLocaleString()} L  —  Usable Supply: ${puzzle.usableSupply.toLocaleString()} L`;
+    // Leakage / difficulty banner
+    const banner = $("#leakage-banner");
+    const bannerText = $("#leakage-text");
+    if (diff.waiveLeakage && puzzle.leakage > 0) {
+      banner.classList.remove("hidden");
+      banner.classList.add("leakage-banner-waived");
+      bannerText.textContent = `Easy Mode waives this puzzle's usual ${puzzle.leakage.toLocaleString()} L pipe leakage — full starting supply boosted by +20% is usable: ${usableSupply.toLocaleString()} L.`;
+    } else if (puzzle.leakage > 0) {
+      banner.classList.remove("hidden");
+      banner.classList.remove("leakage-banner-waived");
+      bannerText.textContent = `Starting Supply: ${puzzle.startingSupply.toLocaleString()} L — Leakage: ${puzzle.leakage.toLocaleString()} L — Usable Supply: ${usableSupply.toLocaleString()} L${state.difficulty === "hard" ? " (Hard Mode: additional -10% applied)" : ""}.`;
     } else {
-      $("#leakage-banner").classList.add("hidden");
+      banner.classList.add("hidden");
+      banner.classList.remove("leakage-banner-waived");
     }
 
-    // Best-possible note for shortage puzzles
-    if (isShortagePuzzle(puzzle)) {
-      const best = getBestAchievableEfficiency(puzzle.zones, puzzle.usableSupply);
+    // Best-possible note for shortage puzzles (difficulty-aware)
+    if (isShortagePuzzleForSupply(puzzle, usableSupply)) {
+      const best = getBestAchievableEfficiency(puzzle.zones, usableSupply);
       $("#best-possible-note").classList.remove("hidden");
       $("#best-possible-note").textContent =
-        `💧 Water shortage: supply is below total demand. A perfect 100% isn't possible here — the best achievable result is ${Math.round(best)}%.`;
+        `💧 Water shortage on ${diff.name} mode: usable supply is below total demand. The best achievable result here is ${Math.round(best)}% — and this puzzle clears at ${Math.round(getClearThreshold(puzzle, usableSupply))}% so it always stays winnable.`;
     } else {
       $("#best-possible-note").classList.add("hidden");
     }
@@ -417,7 +550,7 @@
     grid.innerHTML = "";
     puzzle.zones.forEach((zone) => {
       const card = document.createElement("div");
-      card.className = "building-card";
+      card.className = "building-card state-empty";
       card.dataset.zoneKey = zone.key;
       card.innerHTML = `
         ${zone.critical ? '<span class="critical-tag">CRITICAL</span>' : ""}
@@ -427,7 +560,11 @@
             <div class="building-name">${zone.name}</div>
             <div class="building-demand">Needs ${zone.demand.toLocaleString()} L</div>
           </div>
-          <span class="status-badge" data-role="status-badge">Unsatisfied</span>
+          <span class="status-badge" data-role="status-badge">✕ Unsatisfied</span>
+        </div>
+        <span class="pipe-label">Pipe from reservoir</span>
+        <div class="pipe-connector" data-role="pipe">
+          <div class="pipe-fill" data-role="pipe-fill"></div>
         </div>
         <div class="building-progress-track">
           <div class="building-progress-fill" data-role="progress-fill"></div>
@@ -446,7 +583,6 @@
       grid.appendChild(card);
     });
 
-    // Wire up controls (event delegation per-card to keep handlers simple)
     grid.querySelectorAll(".building-card").forEach((card) => {
       const zoneKey = card.dataset.zoneKey;
       const slider = card.querySelector(".alloc-slider");
@@ -458,40 +594,58 @@
       });
       decBtn.addEventListener("click", () => {
         setAllocation(puzzle, zoneKey, (currentAllocations[zoneKey] || 0) - 10);
-        Sound.click();
       });
       incBtn.addEventListener("click", () => {
         setAllocation(puzzle, zoneKey, (currentAllocations[zoneKey] || 0) + 10);
-        Sound.click();
       });
     });
   }
 
-  // Clamp and apply a new allocation value for one zone, respecting demand cap and total supply cap.
+  // Clamp and apply a new allocation value for one zone, respecting demand cap and difficulty-adjusted supply cap.
   function setAllocation(puzzle, zoneKey, requestedValue) {
     const zone = puzzle.zones.find((z) => z.key === zoneKey);
     if (!zone) return;
+    const usableSupply = currentUsableSupply(puzzle);
 
     const otherAllocatedSum = Object.keys(currentAllocations).reduce((sum, key) => {
       return key === zoneKey ? sum : sum + (currentAllocations[key] || 0);
     }, 0);
-    const maxAllowedBySupply = puzzle.usableSupply - otherAllocatedSum;
+    const maxAllowedBySupply = usableSupply - otherAllocatedSum;
 
     let value = Math.max(0, requestedValue);
-    value = Math.min(value, zone.demand);     // never exceed this building's demand (excess is wasted)
-    value = Math.min(value, maxAllowedBySupply); // never exceed total available supply
+    value = Math.min(value, zone.demand);
+    value = Math.min(value, maxAllowedBySupply);
     if (value < 0) value = 0;
 
+    const previousValue = currentAllocations[zoneKey] || 0;
     currentAllocations[zoneKey] = value;
     updateBuildingCard(puzzle, zoneKey);
     updateRemainingAndEfficiency(puzzle);
     Sound.allocate();
+
+    if (value > previousValue) spawnDroplet(zoneKey);
   }
 
   function getZoneState(zone, allocated) {
     if (allocated >= zone.demand) return "full";
     if (allocated > 0) return "partial";
     return "empty";
+  }
+
+  // Dynamically create a transient droplet element traveling along the pipe, then remove it (cleanup).
+  function spawnDroplet(zoneKey) {
+    if (prefersReducedMotion) return;
+    const card = document.querySelector(`.building-card[data-zone-key="${zoneKey}"]`);
+    if (!card) return;
+    const pipe = card.querySelector('[data-role="pipe"]');
+    if (!pipe) return;
+    const drop = document.createElement("span");
+    drop.className = "water-droplet-fx";
+    drop.textContent = "💧";
+    pipe.appendChild(drop);
+    const cleanup = () => { if (drop.parentNode) drop.parentNode.removeChild(drop); };
+    drop.addEventListener("animationend", cleanup);
+    setTimeout(cleanup, 900); // safety-net fallback
   }
 
   function updateBuildingCard(puzzle, zoneKey) {
@@ -506,17 +660,18 @@
 
     const pct = Math.min(100, (allocated / zone.demand) * 100);
     card.querySelector('[data-role="progress-fill"]').style.width = pct + "%";
+
+    const pipeFill = card.querySelector('[data-role="pipe-fill"]');
+    pipeFill.style.width = pct + "%";
+    pipeFill.classList.toggle("pipe-flowing", zoneState === "partial" && !prefersReducedMotion);
+
     card.querySelector('[data-role="allocated-readout"]').textContent =
       `${allocated.toLocaleString()} / ${zone.demand.toLocaleString()} L`;
 
     const badge = card.querySelector('[data-role="status-badge"]');
-    if (zoneState === "full") {
-      badge.textContent = "✓ Fully Satisfied";
-    } else if (zoneState === "partial") {
-      badge.textContent = "◐ Partially Satisfied";
-    } else {
-      badge.textContent = "✕ Unsatisfied";
-    }
+    if (zoneState === "full") badge.textContent = "✓ Fully Satisfied";
+    else if (zoneState === "partial") badge.textContent = "◐ Partially Satisfied";
+    else badge.textContent = "✕ Unsatisfied";
 
     const slider = card.querySelector(".alloc-slider");
     if (parseInt(slider.value, 10) !== allocated) slider.value = allocated;
@@ -525,64 +680,71 @@
     const incBtn = card.querySelector('[data-action="increment"]');
     decBtn.disabled = allocated <= 0;
 
+    const usableSupply = currentUsableSupply(puzzle);
     const otherAllocatedSum = Object.keys(currentAllocations).reduce((sum, key) => {
       return key === zoneKey ? sum : sum + (currentAllocations[key] || 0);
     }, 0);
-    const remainingForThis = puzzle.usableSupply - otherAllocatedSum - allocated;
+    const remainingForThis = usableSupply - otherAllocatedSum - allocated;
     incBtn.disabled = allocated >= zone.demand || remainingForThis <= 0;
   }
 
   function updateRemainingAndEfficiency(puzzle) {
+    const usableSupply = currentUsableSupply(puzzle);
     const totalAllocated = Object.values(currentAllocations).reduce((s, v) => s + v, 0);
-    const remaining = puzzle.usableSupply - totalAllocated;
+    const remaining = usableSupply - totalAllocated;
     $("#supply-remaining").textContent = `${remaining.toLocaleString()} L`;
 
-    const pct = puzzle.usableSupply > 0 ? Math.max(0, Math.min(100, (remaining / puzzle.usableSupply) * 100)) : 0;
+    const pct = usableSupply > 0 ? Math.max(0, Math.min(100, (remaining / usableSupply) * 100)) : 0;
     $("#remaining-fill").style.width = pct + "%";
     $("#remaining-fill").style.background = remaining <= 0 ? "var(--warning)" : "";
 
     const efficiency = calculateEfficiency(puzzle.zones, currentAllocations);
     $("#puzzle-efficiency-preview").textContent = Math.round(efficiency) + "%";
 
-    // Refresh every building card's +/- availability since supply headroom changed.
     puzzle.zones.forEach((z) => updateBuildingCard(puzzle, z.key));
   }
 
+  // Clears allocations and any in-flight droplet/animation elements. Never touches XP or town progress.
   function resetAllocation() {
     const puzzle = getPuzzleById(state.currentPuzzleId);
     if (!puzzle) return;
     puzzle.zones.forEach((z) => (currentAllocations[z.key] = 0));
-    renderTownGrid(puzzle);
+    renderTownGrid(puzzle); // full rebuild: wipes any lingering droplet elements/animations
     updateRemainingAndEfficiency(puzzle);
     Sound.click();
   }
 
   /* =========================================================
-     9. SUBMIT / RESULTS
+     11. SUBMIT / RESULTS
      ========================================================= */
 
-  function submitDistribution() {
+  function submitDistribution(autoSubmitted) {
     const puzzle = getPuzzleById(state.currentPuzzleId);
     if (!puzzle) return;
+    stopTimer();
 
+    const usableSupply = currentUsableSupply(puzzle);
     const efficiency = calculateEfficiency(puzzle.zones, currentAllocations);
     const bracket = getResultBracket(efficiency);
     const xpForResult = calculateXP(bracket);
 
-    // XP anti-farming: only award the improvement over the best previously-earned reward for this puzzle.
-    const prevBestReward = state.puzzleBestReward[puzzle.id] || 0;
+    // XP anti-farming: only award the improvement over the best previously-earned reward for this puzzle+difficulty.
+    const key = rewardKey(puzzle.id);
+    const prevBestReward = state.puzzleBestReward[key] || 0;
     const gainedXP = Math.max(0, xpForResult - prevBestReward);
+    const oldTotalXP = state.totalXP;
     state.totalXP += gainedXP;
-    state.puzzleBestReward[puzzle.id] = Math.max(prevBestReward, xpForResult);
+    state.puzzleBestReward[key] = Math.max(prevBestReward, xpForResult);
 
-    const prevBestEff = state.puzzleBestEfficiency[puzzle.id] || 0;
-    state.puzzleBestEfficiency[puzzle.id] = Math.max(prevBestEff, efficiency);
+    const prevBestEff = state.puzzleBestEfficiency[key] || 0;
+    state.puzzleBestEfficiency[key] = Math.max(prevBestEff, efficiency);
 
+    const clearThreshold = getClearThreshold(puzzle, usableSupply);
+    const resourceConstrained = clearThreshold < 60;
     const wasAlreadyCleared = !!state.puzzleCleared[puzzle.id];
-    const clearsNow = efficiency >= 60;
+    const clearsNow = efficiency >= clearThreshold;
     if (clearsNow) state.puzzleCleared[puzzle.id] = true;
 
-    // Unlock next puzzle (within town, or first puzzle of next town) once cleared.
     let nextPuzzleId = null;
     let townJustCompleted = false;
     if (clearsNow) {
@@ -593,45 +755,41 @@
         if (!state.unlockedPuzzleIds.includes(next.id)) state.unlockedPuzzleIds.push(next.id);
         if (next.town !== puzzle.town) townJustCompleted = true;
       } else {
-        // Final puzzle of the final town.
         townJustCompleted = true;
       }
     }
 
-    // Achievements
     const newlyUnlocked = [];
     if (!state.achievements.first_drop && clearsNow) {
-      state.achievements.first_drop = true;
-      newlyUnlocked.push("first_drop");
+      state.achievements.first_drop = true; newlyUnlocked.push("first_drop");
     }
     if (!state.achievements.perfect_flow && efficiency >= 100) {
-      state.achievements.perfect_flow = true;
-      newlyUnlocked.push("perfect_flow");
+      state.achievements.perfect_flow = true; newlyUnlocked.push("perfect_flow");
     }
-    if (!state.achievements.resource_master && clearsNow && isShortagePuzzle(puzzle)) {
-      state.achievements.resource_master = true;
-      newlyUnlocked.push("resource_master");
+    if (!state.achievements.resource_master && clearsNow && isShortagePuzzleForSupply(puzzle, usableSupply)) {
+      state.achievements.resource_master = true; newlyUnlocked.push("resource_master");
     }
     const townPuzzles = getTownPuzzles(puzzle.town);
     const allTownPuzzlesCleared = townPuzzles.every((p) => state.puzzleCleared[p.id]);
     if (!state.achievements.water_hero && allTownPuzzlesCleared) {
-      state.achievements.water_hero = true;
-      newlyUnlocked.push("water_hero");
+      state.achievements.water_hero = true; newlyUnlocked.push("water_hero");
     }
+
+    const newMilestones = checkMilestones(oldTotalXP, state.totalXP);
 
     saveProgress();
 
     lastSubmission = {
-      puzzle, efficiency, bracket, xpForResult, gainedXP,
-      wasAlreadyCleared, clearsNow, nextPuzzleId, townJustCompleted,
-      newlyUnlocked, allocations: Object.assign({}, currentAllocations),
+      puzzle, efficiency, bracket, xpForResult, gainedXP, clearThreshold, resourceConstrained,
+      wasAlreadyCleared, clearsNow, nextPuzzleId, townJustCompleted, autoSubmitted,
+      newlyUnlocked, newMilestones, allocations: Object.assign({}, currentAllocations),
     };
 
     displayResults(lastSubmission);
   }
 
   function displayResults(result) {
-    const { puzzle, efficiency, bracket, xpForResult, gainedXP, clearsNow, allocations } = result;
+    const { puzzle, efficiency, bracket, xpForResult, gainedXP, clearsNow, resourceConstrained, autoSubmitted, allocations } = result;
 
     const card = $(".results-card");
     card.classList.remove("result-success", "result-partial", "result-failure");
@@ -655,22 +813,28 @@
     } else {
       icon.textContent = "❌";
       title.textContent = "Needs Improvement";
-      message.textContent = "Several communities didn't get enough water. Don't worry — you can retry right away.";
+      message.textContent = autoSubmitted
+        ? "Time ran out before you finished allocating — don't worry, you can retry right away."
+        : "Several communities didn't get enough water. Don't worry — you can retry right away.";
       Sound.failure();
     }
 
-    // Efficiency ring
+    if (clearsNow && resourceConstrained && bracket !== "success") {
+      message.textContent += " Given this difficulty's reduced supply, that's the best possible outcome for this puzzle — you've cleared it despite the resource constraint!";
+    }
+
     const degrees = (efficiency / 100) * 360;
     $("#eff-ring").style.background = `conic-gradient(var(--blue) ${degrees}deg, var(--light-blue) ${degrees}deg)`;
     $("#eff-ring-value").textContent = Math.round(efficiency) + "%";
 
-    // Per-zone breakdown
     const zonesList = $("#result-zones");
     zonesList.innerHTML = "";
+    let satisfiedCount = 0;
     puzzle.zones.forEach((zone) => {
       const allocated = allocations[zone.key] || 0;
       const st = getZoneState(zone, allocated);
-      const icon2 = st === "full" ? "✅" : st === "partial" ? "⚠️" : "❌";
+      if (st === "full") satisfiedCount++;
+      const icon2 = st === "full" ? "✅" : st === "partial" ? "◐" : "❌";
       const criticalWarn = zone.critical && st !== "full" ? ' <strong style="color:var(--error)">(critical!)</strong>' : "";
       const row = document.createElement("div");
       row.className = "zone-row";
@@ -678,19 +842,20 @@
       zonesList.appendChild(row);
     });
 
-    // XP
+    $("#result-summary-counts").textContent = `${satisfiedCount} of ${puzzle.zones.length} buildings fully satisfied`;
+
     $("#xp-award-value").textContent = `+${gainedXP}`;
     if (gainedXP === 0 && xpForResult > 0) {
-      $("#xp-note").textContent = `You already earned the max XP (${xpForResult}) for this result on a previous attempt — no additional XP this time, but feel free to keep improving!`;
+      $("#xp-note").textContent = `You already earned the max XP (${xpForResult}) for this result on this difficulty — no additional XP this time, but feel free to keep improving!`;
     } else if (gainedXP < xpForResult) {
-      $("#xp-note").textContent = `(Improved from a previous attempt — awarded the ${gainedXP} XP difference above your prior best.)`;
+      $("#xp-note").textContent = `(Improved from a previous attempt on this difficulty — awarded the ${gainedXP} XP difference above your prior best.)`;
     } else {
       $("#xp-note").textContent = "";
     }
+    $("#result-total-xp").textContent = state.totalXP;
 
     $("#result-fact").textContent = `💡 Did you know? ${puzzle.fact}`;
 
-    // Action buttons
     const continueBtn = $("#btn-continue");
     if (clearsNow) {
       continueBtn.style.display = "inline-block";
@@ -699,9 +864,10 @@
       continueBtn.style.display = "none";
     }
 
-    renderHome(); // keep home stats in sync even though screen isn't visible
+    renderHome();
     openOverlay("overlay-results");
     if (gainedXP > 0) showXpToast(gainedXP);
+    if (result.newMilestones && result.newMilestones.length) queueMilestoneToasts(result.newMilestones);
   }
 
   function handleContinue() {
@@ -720,9 +886,10 @@
   }
 
   function showTownComplete(townId) {
+    stopTimer();
     const meta = getTownMeta(townId);
     const townPuzzles = getTownPuzzles(townId);
-    const earnedXP = townPuzzles.reduce((s, p) => s + (state.puzzleBestReward[p.id] || 0), 0);
+    const earnedXP = townPuzzles.reduce((s, p) => s + bestRewardAcrossDifficulties(p.id), 0);
 
     $("#town-complete-impact").textContent = meta.impactText;
     $("#town-complete-xp").textContent = earnedXP;
@@ -738,7 +905,7 @@
         saveProgress();
         closeOverlay("overlay-town-complete");
         const firstPuzzle = getTownPuzzles(nextTown.id)[0];
-        loadPuzzle(firstPuzzle.id);
+        openDifficultyScreen(firstPuzzle.id);
       };
     } else {
       nextBtn.style.display = "none";
@@ -750,7 +917,7 @@
   }
 
   /* =========================================================
-     10. FX: confetti + XP toast
+     12. FX: confetti + XP toast + milestone toast
      ========================================================= */
 
   function spawnConfetti() {
@@ -774,16 +941,30 @@
     const toast = $("#xp-toast");
     toast.textContent = `+${amount} XP`;
     toast.classList.remove("hidden");
-    // restart animation
     toast.style.animation = "none";
-    requestAnimationFrame(() => {
-      toast.style.animation = "";
+    requestAnimationFrame(() => { toast.style.animation = ""; });
+    setTimeout(() => toast.classList.add("hidden"), 2400);
+  }
+
+  // Multiple milestones can be crossed in one submission (big XP jump); show them one after another.
+  function queueMilestoneToasts(milestones) {
+    milestones.forEach((m, i) => {
+      setTimeout(() => showMilestoneToast(m), i * 2600);
     });
+  }
+
+  function showMilestoneToast(milestone) {
+    const toast = $("#milestone-toast");
+    toast.textContent = `${milestone.icon} Milestone Unlocked: ${milestone.name}!`;
+    toast.classList.remove("hidden");
+    toast.style.animation = "none";
+    requestAnimationFrame(() => { toast.style.animation = ""; });
+    Sound.milestone();
     setTimeout(() => toast.classList.add("hidden"), 2400);
   }
 
   /* =========================================================
-     11. LEADERBOARD
+     13. LEADERBOARD
      ========================================================= */
 
   const DEMO_PLAYERS = [
@@ -818,7 +999,7 @@
   }
 
   /* =========================================================
-     12. PROFILE / ACHIEVEMENTS
+     14. PROFILE / ACHIEVEMENTS / MILESTONES
      ========================================================= */
 
   function renderProfile() {
@@ -832,6 +1013,7 @@
       <div class="pstat"><strong>${puzzlesCompleted} / ${PUZZLES.length}</strong><span>Puzzles Completed</span></div>
       <div class="pstat"><strong>${townsCompleted} / ${TOWNS.length}</strong><span>Towns Completed</span></div>
       <div class="pstat"><strong>${Math.round(bestEff)}%</strong><span>Best Efficiency</span></div>
+      <div class="pstat"><strong>${DIFFICULTIES[state.difficulty].icon} ${DIFFICULTIES[state.difficulty].name}</strong><span>Current Difficulty</span></div>
     `;
 
     const grid = $("#achievements-grid");
@@ -844,11 +1026,42 @@
       grid.appendChild(div);
     });
 
+    renderMilestones();
     updateSoundButtons();
   }
 
+  function renderMilestones() {
+    const container = $("#milestones-panel");
+    const nextMilestone = MILESTONES.find((m) => state.totalXP < m.xp);
+    let progressHtml;
+    if (nextMilestone) {
+      const prevThreshold = MILESTONES.slice().reverse().find((m) => m.xp <= state.totalXP);
+      const prevXp = prevThreshold ? prevThreshold.xp : 0;
+      const pct = Math.min(100, ((state.totalXP - prevXp) / (nextMilestone.xp - prevXp)) * 100);
+      progressHtml = `
+        <div class="milestone-progress">
+          <div class="milestone-progress-label">Current XP: ${state.totalXP} / Next Milestone: ${nextMilestone.name} — Progress: ${state.totalXP}/${nextMilestone.xp} XP</div>
+          <div class="milestone-progress-track"><div class="milestone-progress-fill" style="width:${pct}%"></div></div>
+        </div>`;
+    } else {
+      progressHtml = `<div class="milestone-progress"><div class="milestone-progress-label">🎉 Current XP: ${state.totalXP} — All milestones unlocked!</div></div>`;
+    }
+
+    const listHtml = MILESTONES.map((m) => {
+      const unlocked = !!state.milestonesUnlocked[m.id];
+      return `
+        <div class="milestone-item ${unlocked ? "unlocked" : ""}">
+          <span class="milestone-icon">${m.icon}</span>
+          <div><strong>${m.name}</strong><span>${m.xp} XP</span></div>
+          <span class="${unlocked ? "milestone-check" : "milestone-lock"}">${unlocked ? "✓" : "🔒"}</span>
+        </div>`;
+    }).join("");
+
+    container.innerHTML = progressHtml + `<div class="milestone-list">${listHtml}</div>`;
+  }
+
   /* =========================================================
-     13. SOUND TOGGLE
+     15. SOUND TOGGLE
      ========================================================= */
 
   function updateSoundButtons() {
@@ -868,14 +1081,11 @@
   }
 
   /* =========================================================
-     14. EVENT WIRING
+     16. EVENT WIRING
      ========================================================= */
 
   function wireEvents() {
-    $("#btn-play").addEventListener("click", () => {
-      Sound.click();
-      loadPuzzle(state.currentPuzzleId);
-    });
+    $("#btn-play").addEventListener("click", () => { Sound.click(); openDifficultyScreen(state.currentPuzzleId); });
     $("#btn-howto").addEventListener("click", () => { Sound.click(); showScreen("tutorial"); });
     $("#btn-leaderboard").addEventListener("click", () => { Sound.click(); renderLeaderboard(); showScreen("leaderboard"); });
     $("#btn-profile").addEventListener("click", () => { Sound.click(); renderProfile(); openOverlay("overlay-profile"); });
@@ -884,12 +1094,17 @@
     $("#btn-puzzle-sound").addEventListener("click", toggleSound);
     $("#btn-toggle-sound-profile").addEventListener("click", toggleSound);
 
-    $("#btn-tutorial-play").addEventListener("click", () => { Sound.click(); loadPuzzle(state.currentPuzzleId); });
+    $("#btn-tutorial-play").addEventListener("click", () => { Sound.click(); openDifficultyScreen(state.currentPuzzleId); });
     $("#btn-tutorial-back").addEventListener("click", () => { Sound.click(); renderHome(); showScreen("home"); });
+
+    $("#btn-difficulty-confirm").addEventListener("click", confirmDifficultyAndEnter);
+    $("#btn-difficulty-back").addEventListener("click", () => { Sound.click(); pendingPuzzleId = null; renderHome(); showScreen("home"); });
+
+    $("#btn-change-difficulty").addEventListener("click", () => { Sound.click(); openDifficultyScreen(state.currentPuzzleId); });
 
     $("#btn-puzzle-home").addEventListener("click", () => { Sound.click(); renderHome(); showScreen("home"); });
     $("#btn-reset-allocation").addEventListener("click", resetAllocation);
-    $("#btn-submit").addEventListener("click", () => { Sound.click(); submitDistribution(); });
+    $("#btn-submit").addEventListener("click", () => { Sound.submit(); submitDistribution(false); });
 
     $("#btn-retry").addEventListener("click", handleRetry);
     $("#btn-continue").addEventListener("click", handleContinue);
@@ -929,7 +1144,6 @@
     });
     $("#btn-cancel-reset").addEventListener("click", () => closeOverlay("overlay-confirm-reset"));
 
-    // Close overlays when clicking the dim backdrop (but not the card itself).
     $$(".overlay").forEach((overlay) => {
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay && overlay.id !== "overlay-confirm-reset") {
@@ -938,7 +1152,6 @@
       });
     });
 
-    // Keyboard: Escape closes any open overlay.
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         $$(".overlay:not(.hidden)").forEach((o) => {
@@ -949,7 +1162,7 @@
   }
 
   /* =========================================================
-     15. INIT
+     17. INIT
      ========================================================= */
 
   function initializeGame() {

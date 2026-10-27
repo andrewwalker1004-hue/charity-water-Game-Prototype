@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Flow — A charity: water Game Concept</title>
 <meta name="description" content="Flow: an educational water-allocation puzzle game inspired by charity: water." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -102,6 +105,22 @@
     </div>
   </section>
 
+  <!-- ============ DIFFICULTY SELECT ============ -->
+  <section id="screen-difficulty" class="screen">
+    <div class="panel-wrap">
+      <h2 class="screen-title">Choose Your Difficulty</h2>
+      <p class="difficulty-sub">
+        Pick how challenging this round will be. You can change it anytime from the puzzle screen —
+        your choice never blocks you from clearing a puzzle.
+      </p>
+      <div class="difficulty-grid" id="difficulty-grid"><!-- cards injected by JS --></div>
+      <div class="tutorial-actions">
+        <button id="btn-difficulty-confirm" class="btn btn-primary btn-lg">Start Puzzle →</button>
+        <button id="btn-difficulty-back" class="btn btn-secondary">Back to Home</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ MAIN PUZZLE SCREEN ============ -->
   <section id="screen-puzzle" class="screen">
     <div class="puzzle-wrap">
@@ -115,7 +134,9 @@
         <div class="topbar-stats">
           <div class="mini-stat"><span class="mini-label">XP</span><span class="mini-value" id="puzzle-xp">0</span></div>
           <div class="mini-stat"><span class="mini-label">Efficiency</span><span class="mini-value" id="puzzle-efficiency-preview">0%</span></div>
+          <div class="mini-stat hidden" id="puzzle-timer-wrap"><span class="mini-label">Time Left</span><span class="mini-value" id="puzzle-timer">90s</span></div>
         </div>
+        <button id="btn-change-difficulty" class="btn btn-ghost btn-sm" title="Change difficulty">🎚 <span id="puzzle-difficulty-label">Normal</span></button>
         <button id="btn-puzzle-sound" class="icon-toggle" aria-pressed="true" title="Toggle sound">🔊</button>
       </div>
 
@@ -193,11 +214,14 @@
         <div class="result-zones" id="result-zones"></div>
       </div>
 
+      <div class="result-summary-counts" id="result-summary-counts"></div>
+
       <div class="xp-award">
         <span>XP Earned</span>
         <span class="xp-award-value" id="xp-award-value">+0</span>
       </div>
       <div class="xp-note" id="xp-note"></div>
+      <div class="xp-total-row">Total XP: <strong id="result-total-xp">0</strong></div>
 
       <div class="fact-box" id="result-fact"></div>
 
@@ -262,6 +286,9 @@
       <h3>Achievements</h3>
       <div class="achievements-grid" id="achievements-grid"></div>
 
+      <h3>Milestones</h3>
+      <div class="milestones-panel" id="milestones-panel"></div>
+
       <div class="profile-settings">
         <button id="btn-toggle-sound-profile" class="btn btn-secondary btn-sm">Sound: On</button>
         <button id="btn-reset-game" class="btn btn-danger btn-sm">Reset Game Progress</button>
@@ -284,8 +311,28 @@
   <!-- XP toast popup -->
   <div id="xp-toast" class="xp-toast hidden">+0 XP</div>
 
+  <!-- Milestone toast popup -->
+  <div id="milestone-toast" class="xp-toast milestone-toast hidden"></div>
+
   <!-- Confetti layer -->
   <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+
+  <!-- ============ CHARITY: WATER FOOTER (persistent) ============ -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-inner">
+      <h3 class="footer-heading">Help Bring Clean Water to More Communities</h3>
+      <p class="footer-desc">
+        charity: water is a real nonprofit organization working to bring clean and safe drinking water to people
+        around the world. <strong>Flow is an independent, unofficial educational prototype</strong> inspired by their
+        mission — it is not produced, endorsed, or verified by charity: water, and playing it does
+        <strong>not</strong> generate real donations or fund real water projects.
+      </p>
+      <div class="footer-links">
+        <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">Learn More</a>
+        <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Support Clean Water</a>
+      </div>
+    </div>
+  </footer>
 
 </div>
 

@@ -19,6 +19,9 @@
   --shadow-card: 0 4px 16px rgba(26, 26, 26, 0.08);
   --shadow-lift: 0 8px 28px rgba(26, 26, 26, 0.14);
   --transition: 180ms ease;
+
+  --font-heading: "Poppins", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -26,11 +29,18 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-body);
   background: linear-gradient(180deg, var(--light-blue) 0%, #ffffff 55%);
   color: var(--charcoal);
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+h1, h2, h3,
+.logo-title, .screen-title, .topbar-title, .result-title,
+.building-name, .footer-heading, .town-complete-card h2,
+.learn-card h2, .profile-card h2, .confirm-card h2 {
+  font-family: var(--font-heading);
 }
 
 #app {
@@ -304,6 +314,18 @@ p { line-height: 1.5; }
   font-size: 14px;
 }
 .leakage-banner.hidden { display: none; }
+.leakage-banner.leakage-banner-waived { background: #eaf7fd; border-color: var(--blue); color: #1a5a74; }
+
+#puzzle-timer-wrap.hidden { display: none; }
+#puzzle-timer-wrap .mini-value { transition: color var(--transition); }
+#puzzle-timer-wrap.timer-warning .mini-value {
+  color: var(--error);
+  animation: timerPulse 1s ease-in-out infinite;
+}
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
 
 .water-supply-bar { margin-bottom: 18px; }
 .supply-row {
@@ -353,7 +375,7 @@ p { line-height: 1.5; }
   position: relative;
 }
 .building-card.state-full { border-color: var(--success); }
-.building-card.state-partial { border-color: var(--warning); }
+.building-card.state-partial { border-color: var(--blue); }
 .building-card.state-empty { border-color: var(--error); }
 
 .building-card .critical-tag {
@@ -397,7 +419,7 @@ p { line-height: 1.5; }
   white-space: nowrap;
 }
 .state-full .status-badge { background: #d9f3e2; color: var(--success); }
-.state-partial .status-badge { background: #fdeccd; color: #a06b14; }
+.state-partial .status-badge { background: #dbf0fa; color: var(--blue); }
 .state-empty .status-badge { background: #fbe3e3; color: var(--error); }
 
 .building-progress-track {
@@ -406,6 +428,7 @@ p { line-height: 1.5; }
   background: #eef2f3;
   overflow: hidden;
   margin: 10px 0 6px;
+  position: relative;
 }
 .building-progress-fill {
   height: 100%;
@@ -415,8 +438,62 @@ p { line-height: 1.5; }
   transition: width 260ms ease, background 260ms ease;
 }
 .state-full .building-progress-fill { background: var(--success); }
-.state-partial .building-progress-fill { background: var(--warning); }
+.state-partial .building-progress-fill { background: var(--blue); }
 .state-empty .building-progress-fill { background: var(--error); }
+
+/* ---- Interactive water pipe (reservoir -> building) ---- */
+.pipe-connector {
+  height: 16px;
+  border-radius: 8px;
+  background: #e4edf0;
+  overflow: hidden;
+  margin: 2px 0 10px;
+  position: relative;
+  border: 1px solid #d6e4e8;
+}
+.pipe-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--blue), #5ecbf0);
+  transition: width 260ms ease, background 260ms ease;
+}
+.state-full .pipe-fill { background: linear-gradient(90deg, var(--success), #6fd98c); }
+.state-empty .pipe-fill { width: 0% !important; }
+.pipe-fill.pipe-flowing {
+  background-image: linear-gradient(90deg, var(--blue), #5ecbf0),
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.35) 0 8px, transparent 8px 16px);
+  background-size: 100% 100%, 28px 28px;
+  animation: pipeFlow 900ms linear infinite;
+}
+@keyframes pipeFlow {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 0 0, 28px 0; }
+}
+.pipe-label {
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* ---- Dynamic water droplet FX ---- */
+.water-droplet-fx {
+  position: absolute;
+  left: 4px;
+  top: -2px;
+  font-size: 16px;
+  pointer-events: none;
+  animation: dropletTravel 650ms ease-in forwards;
+  z-index: 5;
+}
+@keyframes dropletTravel {
+  0%   { left: 2%; opacity: 0; transform: scale(0.6); }
+  15%  { opacity: 1; transform: scale(1); }
+  100% { left: 96%; opacity: 0; transform: scale(0.8); }
+}
 
 .allocation-readout {
   display: flex;
@@ -732,6 +809,105 @@ input[type="range"].alloc-slider::-moz-range-thumb {
 }
 
 /* ========================================================
+   DIFFICULTY SELECT
+   ======================================================== */
+.difficulty-sub { text-align: center; color: #666; font-size: 14px; max-width: 520px; margin: 0 auto 20px; }
+
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.difficulty-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 18px;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+  text-align: center;
+}
+.difficulty-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+.difficulty-card.selected { border-color: var(--blue); background: var(--light-blue); }
+.difficulty-card .diff-icon { font-size: 34px; display: block; margin-bottom: 6px; }
+.difficulty-card .diff-name { font-weight: 800; font-size: 17px; margin-bottom: 6px; color: var(--charcoal); }
+.difficulty-card .diff-desc { font-size: 13px; color: #555; margin-bottom: 10px; }
+.difficulty-card .diff-rules { list-style: none; padding: 0; margin: 0; font-size: 12px; color: #777; text-align: left; }
+.difficulty-card .diff-rules li { padding: 2px 0; }
+.difficulty-card:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+/* ========================================================
+   MILESTONES PANEL
+   ======================================================== */
+.milestones-panel { margin-bottom: 18px; }
+.milestone-progress { margin-bottom: 12px; }
+.milestone-progress-label { font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600; }
+.milestone-progress-track {
+  height: 12px;
+  border-radius: 7px;
+  background: #eef2f3;
+  overflow: hidden;
+}
+.milestone-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--yellow), var(--blue));
+  transition: width 400ms ease;
+}
+.milestone-list { display: flex; flex-direction: column; gap: 8px; }
+.milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f6fafb;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  opacity: 0.55;
+}
+.milestone-item.unlocked { opacity: 1; background: #fff6da; box-shadow: 0 0 0 2px var(--yellow) inset; }
+.milestone-item .milestone-icon { font-size: 22px; }
+.milestone-item div { flex: 1; display: flex; flex-direction: column; }
+.milestone-item strong { font-size: 13px; }
+.milestone-item span:not(.milestone-check):not(.milestone-lock) { font-size: 11px; color: #888; }
+.milestone-check { color: var(--success); font-weight: 800; }
+.milestone-lock { opacity: 0.5; }
+
+.milestone-toast { background: var(--blue) !important; }
+
+/* ========================================================
+   RESULT SUMMARY EXTRAS
+   ======================================================== */
+.result-summary-counts {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  background: var(--light-blue);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  margin: 2px 0 10px;
+}
+.xp-total-row { font-size: 13px; color: #666; margin-bottom: 10px; }
+.xp-total-row strong { color: var(--charcoal); }
+
+/* ========================================================
+   CHARITY: WATER FOOTER
+   ======================================================== */
+.site-footer {
+  position: relative;
+  z-index: 2;
+  background: var(--light-blue);
+  border-top: 3px solid var(--yellow);
+  padding: 28px 20px 36px;
+  margin-top: 20px;
+}
+.footer-inner { max-width: 760px; margin: 0 auto; text-align: center; }
+.footer-heading { color: var(--blue); font-size: 20px; }
+.footer-desc { font-size: 13px; color: #3a5a66; margin: 8px 0 16px; }
+.footer-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.footer-links .btn { text-decoration: none; display: inline-block; }
+
+/* ========================================================
    RESPONSIVE
    ======================================================== */
 @media (max-width: 860px) {
@@ -749,6 +925,9 @@ input[type="range"].alloc-slider::-moz-range-thumb {
   .result-actions .btn { width: 100%; }
   .profile-stats, .achievements-grid { grid-template-columns: 1fr 1fr; }
   .overlay-card { padding: 20px; }
+  .difficulty-grid { grid-template-columns: 1fr; }
+  .footer-links { flex-direction: column; align-items: stretch; }
+  .footer-links .btn { width: 100%; }
 }
 
 @media (min-width: 1200px) {
