@@ -78,8 +78,4 @@ Building icons currently use emoji (🏥🏠🏫🏭) combined with CSS cards/an
 - `localStorage` persistence for XP, puzzle/town progress, achievements, sound setting, and best scores, with graceful fallback if saved data is missing or corrupted.
 - Reset Game option with a confirmation step before erasing progress.
 
-## Known limitations / what's not included
 
-- No backend — the leaderboard is local to each browser/device only, by design.
-- Building illustrations are emoji + CSS rather than custom artwork; `assets/images` and `assets/icons` are provided for future expansion.
-- Sound effects are synthesized tones rather than produced audio files.
